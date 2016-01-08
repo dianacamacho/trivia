@@ -20,7 +20,7 @@ class Card
   end
 
   def answer
-    @multiple_choices.detect do |answer_choice|
+    @multiple_choices.each do |answer_choice|
       if answer_choice.include?(@answer.downcase)
         @answer = answer_choice[0]
         break
