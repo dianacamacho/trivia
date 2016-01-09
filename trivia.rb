@@ -13,20 +13,20 @@ class Card
   end
 
   def question
-    puts "-----------------------------------------" # to separate questions and make reading each one easier
+    puts "-----------------------------------------" 
     puts @question
     puts @multiple_choices = ["a. springfield", "b. bloomington", "c. chicago", "d. continent ", "e. country", "f. true", "g. false"]
-    "enter letter of correct answer:"
+    "\nEnter letter of correct answer:"
   end
 
   def answer
     @multiple_choices.each do |answer_choice|
-      if answer_choice.include?(@answer.downcase)
-        @answer = answer_choice[0]
+      if answer_choice.downcase.include?(@answer.downcase)
+        @letter_answer = answer_choice[0]  # added new variable to allow for @answer to keep original value for retry portion of challenge (#3)
         break
       end
     end
-    @answer
+  @letter_answer
   end
   
 end
@@ -45,11 +45,11 @@ class Deck
   end
 
   def draw_card
-    @drawn_card = @cards.pop 
+    @cards.pop 
   end
 
   def remaining_cards
-    @remaining_cards = @cards.count
+    @cards.count
   end
 
 end
@@ -63,15 +63,75 @@ trivia_data = {
 
 deck = Deck.new(trivia_data) # deck is an instance of the Deck class
 
+correct_answer_count = 0
+wrong_answer_count = 0
+incorrect_cards = []
+
+
 while deck.remaining_cards > 0
   card = deck.draw_card # card is an instance of the Card class
   puts card.question
-  user_answer = gets.chomp
-  if user_answer.downcase == card.answer.downcase
-    puts "Correct!"
-  else
-    puts "Incorrect!"
+
+  try_again_count = 0
+
+  2.times do 
+    user_answer = gets.chomp
+    puts "*****************************************"
+  
+    if user_answer.downcase == card.answer.downcase
+      puts "Correct!"
+      "*****************************************"
+      correct_answer_count += 1
+      break
+    else
+      puts "Incorrect!"
+      "*****************************************"
+      puts "\nTry again:" unless try_again_count == 1
+
+      try_again_count += 1
+        if try_again_count == 2
+          incorrect_cards << card       
+          wrong_answer_count += 1 
+        end  
+    end
   end
 end
 
-#p deck.remaining_cards
+total_questions = correct_answer_count + wrong_answer_count
+
+puts "\nYou answered #{correct_answer_count}/#{total_questions} questions correctly."
+puts "-----------------------------------------"
+puts "Would you like to retry the cards you got wrong (yes/no):"
+
+retry_response = gets.chomp
+  if retry_response.downcase == "yes"
+    incorrect_cards.each do |card|
+      puts card.question
+      try_again_count = 0
+
+      2.times do 
+        user_answer = gets.chomp
+        puts "*****************************************"
+      
+        if user_answer.downcase == card.answer.downcase
+          puts "Correct!"
+          "*****************************************"
+          correct_answer_count += 1
+          break
+        else
+          puts "Incorrect!"
+          "*****************************************"
+          puts "\nTry again:" unless try_again_count == 1
+
+          try_again_count += 1
+            if try_again_count == 2
+              wrong_answer_count += 1 
+            end
+        end  
+      end
+    end
+    puts "\nYou answered #{correct_answer_count}/#{total_questions} questions correctly."
+  else
+    puts "-----------------------------------------"
+    puts "Game Over"
+  end
